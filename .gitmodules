@@ -1,0 +1,3 @@
+[submodule "src/github.com/jbrukh/bayesian"]
+	path = src/github.com/jbrukh/bayesian
+	url = git://github.com/jbrukh/bayesian.git
