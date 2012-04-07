@@ -5,16 +5,37 @@ import(
   "os"
   "path/filepath"
   "io/ioutil"
+  // Store the syntax extension
+  "regexp"
   "strings"
   "log"
   "github.com/jbrukh/bayesian"
 )
 
+const (
+    Ruby bayesian.Class = "ruby"
+    Go bayesian.Class = "go"
+)
+
+type Syntax struct {
+  name string
+  extensions *regexp.Regexp
+  class bayesian.Class
+}
 
 type Scanner struct {
   classifier * bayesian.Classifier
   save_file string
 }
+
+func validLanguages() []  Syntax {
+  s := []Syntax{
+    Syntax{"go",    regexp.MustCompile("go"), bayesian.Class("go")},
+    Syntax{"ruby",  regexp.MustCompile("rb"), bayesian.Class("ruby")}}
+
+  return s
+}
+
 
 func InitFromFile(path string, classes ... bayesian.Class ) ( * Scanner) {
   log.Printf("Loading %s", path)
@@ -31,7 +52,7 @@ func InitFromFile(path string, classes ... bayesian.Class ) ( * Scanner) {
   return &Scanner{classifier, path}
 }
 
-
+// Scan a file or folder according to a provided Class
 func (scanner * Scanner) Scan(path string, lang bayesian.Class) {
   
   wf := func (path string, info os.FileInfo, err error) error {

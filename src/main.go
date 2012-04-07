@@ -15,7 +15,6 @@ const (
 )
 
 func main() {
-  
   allowed := betterSlice.StringSlice{"go", "ruby", "python", "perl", "obj-c", "auto"}
 
   if len(os.Args) == 3 {
