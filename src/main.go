@@ -23,12 +23,9 @@ func main() {
       path := os.Args[2]
       fmt.Printf("Will read %s as language: %s.\n", path, lang)
       if allowed.Pos(lang) > -1 {
-        my_scanner, err := scanner.InitFromFile("plop.data", Go, Ruby)
-        if err != nil {
-          my_scanner = &scanner.Scanner{bayesian.NewClassifier(Ruby, Go), "plop.data"}
-        }
+        my_scanner := scanner.InitFromFile("plop.data", Go, Ruby)
 
-        my_scanner.Scan(path, lang)
+        my_scanner.Scan(path, Go)
         my_scanner.Snapshot()
       } else {
         fmt.Printf("%s is not an allowed language among %q.\n", lang, allowed)

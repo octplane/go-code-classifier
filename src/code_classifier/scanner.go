@@ -16,12 +16,12 @@ type Scanner struct {
   save_file string
 }
 
-func InitFromFile(path string, classes ... bayesian.Class ) ( * Scanner, error) {
+func InitFromFile(path string, classes ... bayesian.Class ) ( * Scanner) {
   log.Printf("Loading %s", path)
   classifier, err := bayesian.NewClassifierFromFile(path)
   if err != nil {
     if os.IsNotExist(err) {
-      classifier, err := bayesian.NewClassifier(classes)
+      classifier = bayesian.NewClassifier(classes ...)
       if err != nil {
         log.Fatal(err)
       }
@@ -31,7 +31,8 @@ func InitFromFile(path string, classes ... bayesian.Class ) ( * Scanner, error) 
   return &Scanner{classifier, path}
 }
 
-func (scanner * Scanner) Scan(path string, lang string) {
+
+func (scanner * Scanner) Scan(path string, lang bayesian.Class) {
   
   wf := func (path string, info os.FileInfo, err error) error {
     if ! info.IsDir() {
@@ -50,11 +51,11 @@ func (scanner * Scanner) Snapshot() {
     log.Fatal(err)
   }
 }
-func (scanner * Scanner) Classify(path string, lang string) {
+func (scanner * Scanner) Classify(path string, lang bayesian.Class) {
   fmt.Printf("Scanning %s...\n", filepath.Base(path))
   contents, err := ioutil.ReadFile(path);
   if err == nil {
-    scanner.classifier.Learn(strings.Split(" ",string(contents)), Go)
+    scanner.classifier.Learn(strings.Split(" ",string(contents)), lang)
   } else {
     log.Fatal(err)
   }
