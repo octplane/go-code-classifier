@@ -5,11 +5,11 @@ import(
   "os"
   "path/filepath"
   "io/ioutil"
-  // Store the syntax extension
   "regexp"
   "strings"
   "log"
   "github.com/jbrukh/bayesian"
+  "cclassifier/catalog"
 )
 
 const (
@@ -24,7 +24,8 @@ type Syntax struct {
 
 type Scanner struct {
   classifier * bayesian.Classifier
-  save_file string
+  catalog * catalog.Catalog
+  base_fname string
 }
 
 var (
@@ -38,36 +39,53 @@ var (
 
 // Prepare the other data structures used by the scanner
 func init() {
-  EXTENSIONS_TO_SYNTAX := make(map[*regexp.Regexp]*Syntax)
-  CLASS_TO_SYNTAX := make(map[bayesian.Class]*Syntax)
+  EXTENSIONS_TO_SYNTAX = make(map[*regexp.Regexp]*Syntax)
+  CLASS_TO_SYNTAX = make(map[bayesian.Class]*Syntax)
 
   for _, syntax := range(VALID_LANGUAGES) {
     fmt.Printf("Adding %s language.\n", syntax.name)
     EXTENSIONS_TO_SYNTAX[syntax.extensions] = syntax
     CLASS_TO_SYNTAX[syntax.class] = syntax
   }
-  BAYESIAN_CLASSES := make([] bayesian.Class, 0)
+  BAYESIAN_CLASSES = make([] bayesian.Class, 0)
   for re, _ := range CLASS_TO_SYNTAX {
     BAYESIAN_CLASSES = append(BAYESIAN_CLASSES, re)
   }
 }
 
-// This is the only constructor you should use
-func InitFromFile(path string) ( * Scanner) {
-  log.Printf("Loading %s", path)
-  classifier, err := bayesian.NewClassifierFromFile(path)
+/* A constructor for a Scanner object. Creates or load a Scanner.
+  Bayesian data file is written to dir_name + base_name + ".bay"
+  Scanner data file is written to dir_name + base_name + ".sca"
+*/
+func InitFromFile(dir_name string, base_name string) ( * Scanner) {
+  ret := &Scanner{base_fname : filepath.Join(dir_name,base_name)}
+  ret.LoadOrCreate()
+  return ret
+}
+
+func (scanner * Scanner) LoadOrCreate() {
+  classifier, err := bayesian.NewClassifierFromFile(scanner.BayesianFile())
+  // catalog, err := catalog.NewCatalogFromFile(scanner.CatalogFile())
+
   if err != nil {
     if os.IsNotExist(err) {
       classifier = bayesian.NewClassifier(BAYESIAN_CLASSES ...)
     }
   }
+  scanner.classifier = classifier
+}
 
-  return &Scanner{classifier, path}
+func (scanner * Scanner) BayesianFile() string {
+  return scanner.base_fname + ".bay"
+}
+func (scanner * Scanner) CatalogFile() string {
+  return scanner.base_fname + ".sca"
 }
 
 // Scan a file or folder according to a provided Class
 func (scanner * Scanner) Scan(path string) {
-  
+
+
   wf := func (path string, info os.FileInfo, err error) error {
     if ! info.IsDir() {
       scanner.Classify(path)
@@ -77,16 +95,15 @@ func (scanner * Scanner) Scan(path string) {
   filepath.Walk(path, wf)
 }
 func (scanner * Scanner) Snapshot() {
-  fmt.Printf("Learned %d documents.\n", scanner.classifier.Learned())
-  log.Printf("Saving %s", scanner.save_file)
+  fmt.Printf("Scanner knows %d documents.\n", scanner.classifier.Learned())
+  log.Printf("Saving %s", scanner.BayesianFile())
 
-  err := scanner.classifier.WriteToFile(scanner.save_file)
+  err := scanner.classifier.WriteToFile(scanner.BayesianFile())
   if err != nil {
     log.Fatal(err)
   }
 }
 func (scanner * Scanner) Classify(path string) {
-  fmt.Printf("Scanning %s...\n", filepath.Base(path))
   lang := Invalid
   for re, syntax:= range(EXTENSIONS_TO_SYNTAX) {
     if re.MatchString(filepath.Ext(path)) {

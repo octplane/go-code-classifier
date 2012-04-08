@@ -4,7 +4,7 @@ import (
   "fmt"
   "os"
   "path/filepath"
-  "code_classifier"
+  "cclassifier"
 )
 
 func main() {
@@ -12,7 +12,7 @@ func main() {
   if len(os.Args) == 2 {
       path := os.Args[1]
       fmt.Printf("Will read %s.\n", path)
-      my_scanner := scanner.InitFromFile("plop.data")
+      my_scanner := scanner.InitFromFile(".", "plop")
       my_scanner.Scan(path)
       my_scanner.Snapshot()
     } else {
