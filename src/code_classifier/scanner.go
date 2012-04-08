@@ -25,45 +25,44 @@ type Syntax struct {
 type Scanner struct {
   classifier * bayesian.Classifier
   save_file string
-  name_to_syntax  map[string] *Syntax
-  extensions_to_syntax  map[*regexp.Regexp] *Syntax
-  class_to_syntax map[bayesian.Class] *Syntax
 }
 
-func validLanguages() map[string] *Syntax {
-
-  s := map[string] *Syntax {
+var (
+  VALID_LANGUAGES = map[string] *Syntax {
   "go" : &Syntax{"go",    regexp.MustCompile("go"), bayesian.Class("go")},
   "ruby" : &Syntax{"ruby",  regexp.MustCompile("rb"), bayesian.Class("ruby")}}
+  BAYESIAN_CLASSES [] bayesian.Class
+  EXTENSIONS_TO_SYNTAX map[*regexp.Regexp] * Syntax
+  CLASS_TO_SYNTAX map[bayesian.Class] * Syntax
+)
 
-  return s
+// Prepare the other data structures used by the scanner
+func init() {
+  EXTENSIONS_TO_SYNTAX := make(map[*regexp.Regexp]*Syntax)
+  CLASS_TO_SYNTAX := make(map[bayesian.Class]*Syntax)
+
+  for _, syntax := range(VALID_LANGUAGES) {
+    fmt.Printf("Adding %s language.\n", syntax.name)
+    EXTENSIONS_TO_SYNTAX[syntax.extensions] = syntax
+    CLASS_TO_SYNTAX[syntax.class] = syntax
+  }
+  BAYESIAN_CLASSES := make([] bayesian.Class, 0)
+  for re, _ := range CLASS_TO_SYNTAX {
+    BAYESIAN_CLASSES = append(BAYESIAN_CLASSES, re)
+  }
 }
 
 // This is the only constructor you should use
 func InitFromFile(path string) ( * Scanner) {
   log.Printf("Loading %s", path)
-  vl := validLanguages()
-  by_ext := make(map[*regexp.Regexp]*Syntax)
-  by_class := make(map[bayesian.Class]*Syntax)
-
-  for _, syntax := range(vl) {
-    fmt.Printf("Adding %s language.\n", syntax.name)
-    by_ext[syntax.extensions] = syntax
-    by_class[syntax.class] = syntax
-  }
-
   classifier, err := bayesian.NewClassifierFromFile(path)
   if err != nil {
     if os.IsNotExist(err) {
-      classes := make([] bayesian.Class, 0)
-      for re, _ := range by_class {
-        classes = append(classes, re)
-      }
-      classifier = bayesian.NewClassifier(classes ...)
+      classifier = bayesian.NewClassifier(BAYESIAN_CLASSES ...)
     }
   }
 
-  return &Scanner{classifier, path, vl, by_ext, by_class }
+  return &Scanner{classifier, path}
 }
 
 // Scan a file or folder according to a provided Class
@@ -89,9 +88,9 @@ func (scanner * Scanner) Snapshot() {
 func (scanner * Scanner) Classify(path string) {
   fmt.Printf("Scanning %s...\n", filepath.Base(path))
   lang := Invalid
-  for re, syntax:= range(scanner.extensions_to_syntax) {
+  for re, syntax:= range(EXTENSIONS_TO_SYNTAX) {
     if re.MatchString(filepath.Ext(path)) {
-      lang = scanner.extensions_to_syntax[re].class
+      lang = EXTENSIONS_TO_SYNTAX[re].class
       fmt.Printf("Found a %s file: %s\n", syntax.name, path)
     }
   }
