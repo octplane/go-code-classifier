@@ -31,8 +31,10 @@ type Scanner struct {
 var (
   VALID_LANGUAGES = map[string] *Syntax {
   "go" : &Syntax{"go",    regexp.MustCompile("go"), bayesian.Class("go")},
-  "ruby" : &Syntax{"ruby",  regexp.MustCompile("rb"), bayesian.Class("ruby")}}
-  BAYESIAN_CLASSES [] bayesian.Class
+  "ruby" : &Syntax{"ruby",  regexp.MustCompile("rb"), bayesian.Class("ruby")},
+  "shell": &Syntax{"shell", regexp.MustCompile("sh"), bayesian.Class("shell")}}
+
+  BAYESIAN_CLASSES []bayesian.Class
   EXTENSIONS_TO_SYNTAX map[*regexp.Regexp] * Syntax
   CLASS_TO_SYNTAX map[bayesian.Class] * Syntax
 )
@@ -65,7 +67,7 @@ func InitFromFile(dir_name string, base_name string) ( * Scanner) {
 
 func (scanner * Scanner) LoadOrCreate() {
   classifier, err := bayesian.NewClassifierFromFile(scanner.BayesianFile())
-  // catalog, err := catalog.NewCatalogFromFile(scanner.CatalogFile())
+  catalog, err := catalog.NewCatalogFromFile(scanner.CatalogFile())
 
   if err != nil {
     if os.IsNotExist(err) {
@@ -73,6 +75,7 @@ func (scanner * Scanner) LoadOrCreate() {
     }
   }
   scanner.classifier = classifier
+  scanner.catalog = catalog
 }
 
 func (scanner * Scanner) BayesianFile() string {
