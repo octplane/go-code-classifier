@@ -67,15 +67,22 @@ func InitFromFile(dir_name string, base_name string) ( * Scanner) {
 
 func (scanner * Scanner) LoadOrCreate() {
   classifier, err := bayesian.NewClassifierFromFile(scanner.BayesianFile())
-  catalog, err := catalog.NewCatalogFromFile(scanner.CatalogFile())
 
   if err != nil {
     if os.IsNotExist(err) {
       classifier = bayesian.NewClassifier(BAYESIAN_CLASSES ...)
     }
   }
+
+  cat, err := catalog.NewCatalogFromFile(scanner.CatalogFile())
+
+  if err != nil {
+    if os.IsNotExist(err) {
+      cat = &catalog.Catalog{scanner.CatalogFile(), make([] uint32, 1)}
+    }
+  }
   scanner.classifier = classifier
-  scanner.catalog = catalog
+  scanner.catalog = cat
 }
 
 func (scanner * Scanner) BayesianFile() string {

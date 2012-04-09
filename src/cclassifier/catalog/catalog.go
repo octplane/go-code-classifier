@@ -7,9 +7,13 @@ import (
   "os"
 )
 
+/* a Catalog is just a simple list of uint32 which are in fact
+ a Hash32 of the file
+*/
+
 type Catalog struct {
-  filename string
-  files []uint32
+  Filename string
+  Files []uint32
 }
 type serializableCatalog struct {
   files []uint32
@@ -28,12 +32,12 @@ func NewCatalogFromFile(path string) (cat *Catalog, err error) {
   return &Catalog{path, w.files}, err
 }
 func (c *Catalog) Write() (err error) {
-	file, err := os.OpenFile(c.filename, os.O_WRONLY|os.O_CREATE, 0644)
+	file, err := os.OpenFile(c.Filename, os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
 		return err
 	}
 	enc := gob.NewEncoder(file)
-	err = enc.Encode(&serializableCatalog{c.files})
+	err = enc.Encode(&serializableCatalog{c.Files})
     return
 }
 
