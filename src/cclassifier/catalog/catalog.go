@@ -2,7 +2,7 @@ package catalog
 
 import (
   "encoding/gob"
-//  "hash/crc32"
+  "crypto/md5"
 //  "math"
   "os"
 )
@@ -40,5 +40,10 @@ func (c *Catalog) Write() (err error) {
 	err = enc.Encode(&serializableCatalog{c.Files})
     return
 }
+func (c *Catalog) Include(content string) (ret bool) {
+  var h hash.Hash32 := md5.New()
+  h.write([]byte(content))
+  return false
 
+}
 

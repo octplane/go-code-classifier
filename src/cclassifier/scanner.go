@@ -125,7 +125,10 @@ func (scanner * Scanner) Classify(path string) {
   if lang != Invalid {
     contents, err := ioutil.ReadFile(path);
     if err == nil {
-      scanner.classifier.Learn(strings.Split(" ",string(contents)), lang)
+      if scanner.Catalog.Include(contents) {
+      } else {
+        scanner.classifier.Learn(strings.Split(" ",string(contents)), lang)
+      }
     } else {
       log.Fatal(err)
     }
