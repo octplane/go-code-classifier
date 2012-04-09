@@ -2,8 +2,7 @@ package catalog
 
 import (
   "encoding/gob"
-  "crypto/md5"
-//  "math"
+  "hash/adler32"
   "os"
 )
 
@@ -40,9 +39,8 @@ func (c *Catalog) Write() (err error) {
 	err = enc.Encode(&serializableCatalog{c.Files})
     return
 }
-func (c *Catalog) Include(content string) (ret bool) {
-  var h hash.Hash32 := md5.New()
-  h.write([]byte(content))
+func (c *Catalog) Include(content []byte) (ret bool) {
+  adler32.Checksum([]byte(content))
   return false
 
 }
