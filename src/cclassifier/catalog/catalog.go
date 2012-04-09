@@ -3,6 +3,7 @@ package catalog
 import (
   "encoding/gob"
   "hash/adler32"
+  "sort"
   "os"
 )
 
@@ -39,8 +40,14 @@ func (c *Catalog) Write() (err error) {
 	err = enc.Encode(&serializableCatalog{c.Files})
     return
 }
-func (c *Catalog) Include(content []byte) (ret bool) {
-  adler32.Checksum([]byte(content))
+func (c *Catalog) Append(content []byte) {
+  crc := adler32.Checksum([]byte(content))
+  c.Files = c.Files.append(crc)
+}
+ func (c *Catalog) Include(content []byte) (ret bool) {
+  crc := adler32.Checksum([]byte(content))
+  exists := c.Files.sort.Search(crc)
+  return exists != len(c.Files)
   return false
 
 }
