@@ -15,7 +15,7 @@ git clone git://github.com/octplane/go-code-classifier.git
 cd go-code-classifier
 git submodule init
 git submodule update
-export GOLANG=$PWD
+export GOPATH=$PWD
 go build src/main.go
 ```
 

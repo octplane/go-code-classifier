@@ -13,11 +13,17 @@ import (
 
 type Catalog struct {
   Filename string
-  Files []uint32
+  Files Int32Slice
 }
 type serializableCatalog struct {
-  files []uint32
+  files Int32Slice
 }
+
+type Int32Slice [] uint32
+
+func (p Int32Slice) Len() int { return len(p) }
+func (p Int32Slice) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
+func (p Int32Slice) Less(i, j int) bool { return p[i] < p[j] }
 
 
 func NewCatalogFromFile(path string) (cat *Catalog, err error) {
@@ -42,11 +48,13 @@ func (c *Catalog) Write() (err error) {
 }
 func (c *Catalog) Append(content []byte) {
   crc := adler32.Checksum([]byte(content))
-  c.Files = c.Files.append(crc)
+  c.Files = append(c.Files, crc)
 }
  func (c *Catalog) Include(content []byte) (ret bool) {
   crc := adler32.Checksum([]byte(content))
-  exists := c.Files.sort.Search(crc)
+  sort.Sort(&c.Files)
+  exists := sort.Search(len(c.Files), func(i int) bool { return c.Files[i] >= crc})
+
   return exists != len(c.Files)
   return false
 
