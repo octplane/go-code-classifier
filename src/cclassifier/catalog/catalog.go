@@ -2,6 +2,7 @@ package catalog
 
 import (
 	"encoding/gob"
+	"fmt"
 	"hash/adler32"
 	"os"
 	"sort"
@@ -16,7 +17,7 @@ type Catalog struct {
 	Files    Int32Slice
 }
 type serializableCatalog struct {
-	files Int32Slice
+	Files Int32Slice
 }
 
 type Int32Slice []uint32
@@ -33,10 +34,21 @@ func NewCatalogFromFile(path string) (cat *Catalog, err error) {
 	dec := gob.NewDecoder(file)
 	w := new(serializableCatalog)
 	err = dec.Decode(w)
+	fmt.Printf("Loaded %s with %d entries.\n", path, w.Files.Len())
+	sort.Sort(w.Files)
+	for i := 0; i < w.Files.Len(); i++ {
+		fmt.Printf("%d : 0x%08.8X\n", i, w.Files[i])
+	}
 
-	return &Catalog{path, w.files}, err
+	return &Catalog{path, w.Files}, err
 }
 func (c *Catalog) Write() (err error) {
+	fmt.Printf("Saving catalog %s.\n", c.Filename)
+
+	for i := 0; i < c.Files.Len(); i++ {
+		fmt.Printf("%d : 0x%08.8X\n", i, c.Files[i])
+	}
+
 	file, err := os.OpenFile(c.Filename, os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
 		return err
@@ -47,14 +59,19 @@ func (c *Catalog) Write() (err error) {
 }
 func (c *Catalog) Append(content []byte) {
 	crc := adler32.Checksum([]byte(content))
+	fmt.Printf("Adding 0x%08.8X to the Catalog.\n", crc)
 	c.Files = append(c.Files, crc)
 }
 func (c *Catalog) Include(content []byte) (ret bool) {
 	crc := adler32.Checksum([]byte(content))
-	sort.Sort(&c.Files)
-	exists := sort.Search(len(c.Files), func(i int) bool { return c.Files[i] >= crc })
+	sort.Sort(c.Files)
+	exists := sort.Search(len(c.Files), func(i int) bool {
+		fmt.Printf("Comparing 0x%08.8X and 0x%08.8X %d.\n", c.Files[i], crc, c.Files[i] == crc)
+		return c.Files[i] == crc
+	})
+
+	fmt.Printf("And 0x%08.8X %d %d.\n", crc, exists, len(c.Files))
 
 	return exists != len(c.Files)
-	return false
 
 }

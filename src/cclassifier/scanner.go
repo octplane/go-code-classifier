@@ -78,7 +78,7 @@ func (scanner *Scanner) LoadOrCreate() {
 
 	if err != nil {
 		if os.IsNotExist(err) {
-			cat = &catalog.Catalog{scanner.CatalogFile(), make([]uint32, 1)}
+			cat = &catalog.Catalog{scanner.CatalogFile(), make([]uint32, 0)}
 		}
 	}
 	scanner.classifier = classifier
@@ -132,6 +132,7 @@ func (scanner *Scanner) Classify(path string) {
 			if scanner.catalog.Include(contents) {
 				log.Printf("We have alreay %s in our catalog\n", path)
 			} else {
+				scanner.catalog.Append(contents)
 				scanner.classifier.Learn(strings.Split(" ", string(contents)), lang)
 			}
 		} else {
