@@ -42,12 +42,17 @@ func NewCatalogFromFile(path string) (cat *Catalog, err error) {
 
 	return &Catalog{path, w.Files}, err
 }
-func (c *Catalog) Write() (err error) {
-	fmt.Printf("Saving catalog %s.\n", c.Filename)
 
+func (c *Catalog) Dump() {
 	for i := 0; i < c.Files.Len(); i++ {
 		fmt.Printf("%d : 0x%08.8X\n", i, c.Files[i])
 	}
+}
+
+func (c *Catalog) Write() (err error) {
+	fmt.Printf("Saving catalog %s.\n", c.Filename)
+
+	c.Dump()
 
 	file, err := os.OpenFile(c.Filename, os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
@@ -66,12 +71,11 @@ func (c *Catalog) Include(content []byte) (ret bool) {
 	crc := adler32.Checksum([]byte(content))
 	sort.Sort(c.Files)
 	exists := sort.Search(len(c.Files), func(i int) bool {
-		fmt.Printf("Comparing 0x%08.8X and 0x%08.8X %d.\n", c.Files[i], crc, c.Files[i] == crc)
-		return c.Files[i] == crc
+		return c.Files[i] >= crc
 	})
 
-	fmt.Printf("And 0x%08.8X %d %d.\n", crc, exists, len(c.Files))
-
-	return exists != len(c.Files)
-
+	if exists < len(c.Files) && c.Files[exists] == crc {
+		return true
+	}
+	return false
 }
