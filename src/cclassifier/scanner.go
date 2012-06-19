@@ -2,7 +2,6 @@ package scanner
 
 import (
 	"cclassifier/catalog"
-	"fmt"
 	"github.com/jbrukh/bayesian"
 	"io/ioutil"
 	"log"
@@ -45,7 +44,7 @@ func init() {
 	CLASS_TO_SYNTAX = make(map[bayesian.Class]*Syntax)
 
 	for _, syntax := range VALID_LANGUAGES {
-		fmt.Printf("Adding %s language.\n", syntax.name)
+		log.Printf("Adding %s language.\n", syntax.name)
 		EXTENSIONS_TO_SYNTAX[syntax.extensions] = syntax
 		CLASS_TO_SYNTAX[syntax.class] = syntax
 	}
@@ -104,13 +103,14 @@ func (scanner *Scanner) Scan(path string) {
 	filepath.Walk(path, wf)
 }
 func (scanner *Scanner) Snapshot() {
-	fmt.Printf("Scanner knows %d documents.\n", scanner.classifier.Learned())
+	log.Printf("Scanner knows %d documents.\n", scanner.classifier.Learned())
 	log.Printf("Saving %s", scanner.BayesianFile())
 
 	err := scanner.classifier.WriteToFile(scanner.BayesianFile())
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	err = scanner.catalog.Write()
 	if err != nil {
 		log.Fatal(err)
@@ -122,7 +122,7 @@ func (scanner *Scanner) Classify(path string) {
 	for re, syntax := range EXTENSIONS_TO_SYNTAX {
 		if re.MatchString(filepath.Ext(path)) {
 			lang = EXTENSIONS_TO_SYNTAX[re].class
-			fmt.Printf("Found a %s file: %s\n", syntax.name, path)
+			log.Printf("Found a %s file: %s\n", syntax.name, path)
 		}
 	}
 
@@ -132,8 +132,9 @@ func (scanner *Scanner) Classify(path string) {
 			if scanner.catalog.Include(contents) {
 				log.Printf("We have alreay %s in our catalog\n", path)
 			} else {
+				log.Printf("Learning %s\n", path)
 				scanner.catalog.Append(contents)
-				scanner.classifier.Learn(strings.Split(" ", string(contents)), lang)
+				scanner.classifier.Learn(strings.Split(string(contents), " "), lang)
 			}
 		} else {
 			log.Fatal(err)
