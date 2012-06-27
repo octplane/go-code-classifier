@@ -1,4 +1,4 @@
-./catalog/*
-cclassifier/*
-github.com/*
-stringslice/*
+catalog
+cclassifier
+github.com
+stringslice
