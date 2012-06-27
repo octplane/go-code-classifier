@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"html"
 	"log"
-	"net/http"
+	"os"
+	"path/filepath"
+    "net/http"
 )
 
 func main() {
@@ -34,4 +36,13 @@ func main() {
 		log.Printf("Please provide valid option: path or webserver \n")
 		flag.PrintDefaults()
 	}
+}
+
+
+func init() {
+    http.HandleFunc("/", handler)
+}
+
+func handler(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprint(w, "Hello, world!")
 }

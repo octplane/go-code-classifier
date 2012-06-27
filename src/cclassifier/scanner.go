@@ -1,7 +1,7 @@
 package scanner
 
 import (
-	"cclassifier/catalog"
+	"catalog"
 	"github.com/jbrukh/bayesian"
 	"io/ioutil"
 	"log"
@@ -80,7 +80,7 @@ func (scanner *Scanner) LoadOrCreate() {
 
 	if err != nil {
 		if os.IsNotExist(err) {
-			cat = &catalog.Catalog{scanner.CatalogFile(), make([]uint32, 0)}
+			cat = &catalog.Catalog{Filename:scanner.CatalogFile(), Files:make([]uint32, 0)}
 		}
 	}
 	scanner.classifier = classifier

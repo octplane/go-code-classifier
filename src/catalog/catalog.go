@@ -13,8 +13,8 @@ a Hash32 of the file
 */
 
 type Catalog struct {
-	Filename string
-	Files    Int32Slice
+	Filename string "Filename"
+	Files    Int32Slice "List of filees"
 }
 type serializableCatalog struct {
 	Files Int32Slice
