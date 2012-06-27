@@ -53,6 +53,18 @@
       <h1>Bootstrap starter template</h1>
       <p>Use this document as a way to quick start any new project.<br> All you get is this message and a barebones HTML document.</p>
 
+{{if .Res }}
+<h2>We have some result for your snippet</h2>
+{{ end }}
+{{range .Res}}
+
+{{ .Lang }} {{ .Score}}
+
+{{ end }}
+      <form action="/guess" method="post" class="well">
+        <textarea name="code" style="width:100%;">{{ .Code }}</textarea>
+        <input type="submit" class="btn btn-primary">
+      </form>
     </div> <!-- /container -->
 
     <!-- Le javascript

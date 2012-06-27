@@ -72,6 +72,7 @@ func (scanner *Scanner) LoadOrCreate() {
 
 	if err != nil {
 		if os.IsNotExist(err) {
+            log.Printf("%s does not exist. Creating db\n", scanner.BayesianFile())
 			classifier = bayesian.NewClassifier(BAYESIAN_CLASSES...)
 		}
 	}
@@ -85,6 +86,16 @@ func (scanner *Scanner) LoadOrCreate() {
 	}
 	scanner.classifier = classifier
 	scanner.catalog = cat
+}
+
+func (scanner *Scanner) Guess(input string) (score []float64, lang[]string) {
+  scores, _, _ := scanner.classifier.SafeProbScores(strings.Split(input, " "))
+  n := len(scores)
+  lang = make([]string, n, n)
+  for index, _ := range scores {
+    lang[index] = string(scanner.classifier.Classes[index])
+  }
+  return scores, lang
 }
 
 func (scanner *Scanner) BayesianFile() string {
