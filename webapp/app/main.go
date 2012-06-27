@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"html"
 	"log"
-	"os"
-	"path/filepath"
     "net/http"
 )
 
