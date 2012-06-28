@@ -31,7 +31,7 @@ func guess_handler(w http.ResponseWriter, r *http.Request) {
   
   r.ParseForm()
   code := r.Form.Get("code")
-  my_scanner := scanner.InitFromFile("..", "plop")
+  my_scanner := scanner.InitFromFile(".", "plop")
 
   scores, langs := my_scanner.Guess(code)
   sc := make([]Result, len(scores), len(scores))

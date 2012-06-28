@@ -29,12 +29,12 @@ type Scanner struct {
 
 var (
 	VALID_LANGUAGES = map[string]*Syntax{
-		"go":     &Syntax{"go", regexp.MustCompile("go"), bayesian.Class("go")},
-		"python": &Syntax{"python", regexp.MustCompile("^py$"), bayesian.Class("python")},
-		"perl":   &Syntax{"perl", regexp.MustCompile("^pl$"), bayesian.Class("perl")},
-		"ruby":   &Syntax{"ruby", regexp.MustCompile("rb"), bayesian.Class("ruby")},
-		"shell":  &Syntax{"shell", regexp.MustCompile("sh"), bayesian.Class("shell")},
-		"obj-c":  &Syntax{"obj-c", regexp.MustCompile("^m$"), bayesian.Class("obj-c")}}
+		"go":     &Syntax{"go", regexp.MustCompile("\\.go"), bayesian.Class("go")},
+		"python": &Syntax{"python", regexp.MustCompile("\\.py$"), bayesian.Class("python")},
+		"perl":   &Syntax{"perl", regexp.MustCompile("\\.pl$"), bayesian.Class("perl")},
+		"ruby":   &Syntax{"ruby", regexp.MustCompile("\\.rb"), bayesian.Class("ruby")},
+		"shell":  &Syntax{"shell", regexp.MustCompile("\\.sh"), bayesian.Class("shell")},
+		"obj-c":  &Syntax{"obj-c", regexp.MustCompile("\\.m$"), bayesian.Class("obj-c")}}
 
 	BAYESIAN_CLASSES     []bayesian.Class
 	EXTENSIONS_TO_SYNTAX map[*regexp.Regexp]*Syntax
